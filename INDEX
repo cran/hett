@@ -1,0 +1,9 @@
+mm                      Excess returns for Martin Marietta company
+rent                    Rent for Land PLanted to Alfalfa
+summary.tlm             summary method for class "tlm"
+tlm.control             Auxiliary for Controlling tlm Fitting
+tlm                     Maximum likelihood estimation for
+                        heteroscedastic t regression
+tscore                  Score test for heteroscedastic t models
+tsum                    Summary function for the scale or location
+                        component of a heteroscedastic t model
