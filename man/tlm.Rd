@@ -55,7 +55,7 @@ length.
 is an argument to a function that maintains the control of the
 algorithm. The \code{tlm.control()}function contains the arguments,
 \code{epsilon} to determine how small the relative difference of
-likelihoods should be for convergence (default is 1e-06), \code{maxit}
+likelihoods should be for convergence (default is 1e-07), \code{maxit}
 to determine the maximum iterations required (default = 50),
 \code{trace} if the user requires printing of estimates etc. as
 algorithm runs (default = \code{FALSE}), \code{verboseLev} to determine
