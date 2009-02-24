@@ -109,12 +109,12 @@ the time taken for the algorithm to converge
 }}
 \details{
 When the degrees of freedom is unknown the code uses the non-linear optimiser
-\code{nlm}. If the data is tending toward the Gaussian this optimisation
-will still converge but with with very high degrees of freedom.
+\code{nlm}. If the response (and therefore the errors) is tending toward
+a Gaussian this optimisation will still converge but with with very high degrees of freedom.
 
 To obtain the appropriate standard errors from \code{summary} the user
 must specify the argument \code{obs = F} to ensure that the location
-parameter is calculated using the expected information component.
+parameter is calculated using the expected information.
 }
 \section{Background}{
 The theoretical background for this function can be found in Taylor and Verbyla (2004)
@@ -123,12 +123,13 @@ The theoretical background for this function can be found in Taylor and Verbyla 
 Taylor, J. D. & Verbyla, A. P (2004).
 Joint modelling of the location and scale parameters of the \emph{t}-distribution.
 \emph{Statistical Modelling}
-\bold{4}, to appear.
+\bold{4}, 91-112.
 }
 
 \seealso{
 \code{\link{summary.tlm}}
 }
+\author{Julian Taylor}
 \examples{
 
 data(mm, package = "hett")

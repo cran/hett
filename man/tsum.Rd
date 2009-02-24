@@ -63,6 +63,7 @@ tsum(object, dispersion = NULL, correlation = FALSE,
           argument \code{symbolic.cor}}
       }
 \seealso{\code{\link{summary.tlm}}, \code{\link{tlm}}}
+\author{Julian Taylor}      
 \examples{
 
 data(mm, package = "hett")

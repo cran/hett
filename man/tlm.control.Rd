@@ -19,10 +19,10 @@ positive convergence tolerance value. The iterations converge when
 integer giving the maximum iterations allowable for the routine
 }
 \item{trace}{
-logical. If \code{TRUE} output is printted to the screen during each iteration
+logical. If \code{TRUE} output is printed to the screen during each iteration
 }
 \item{verboseLev}{
-integer. If 1 then print accroding to \code{trace}. If 2 then print
+integer. If 1 then print according to \code{trace}. If 2 then print
 random scale effects also.
 }}
 \value{
@@ -33,6 +33,7 @@ random scale effects also.
 \seealso{
 \code{\link{tlm}}
 }
+\author{Julian Taylor}
 \examples{
 
 data(mm, package = "hett")

@@ -63,6 +63,7 @@ score statistic function \code{tscore}.
 \seealso{
 \code{\link{tsum}}, \code{\link{tlm}}
 }
+\author{Julian Taylor}
 \examples{
 
 data(mm, package = "hett")

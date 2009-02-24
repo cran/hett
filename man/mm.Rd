@@ -5,7 +5,6 @@
 \description{
 Data from the Martin Marietta company collected overa period of 5 years
 on a monthly basis}
-}
 \usage{data(mm)}
 \format{
   A data frame with 60 observations on the following 4 variables.

@@ -23,10 +23,8 @@ logical. If \code{TRUE} the scale model is tested}
 }
 \value{
 Output containing the hypothesis, the score statistic, degrees of
-freedom for the test and the p-value are printed to the screen.
-
-....  
-}}
+freedom for the test and the p-value are printed to the screen.  
+}
 \details{
 The user must supply nested models that test, \emph{either}, the scale
 or the location component of the model. The model objects \emph{must} be
@@ -36,9 +34,16 @@ are not given in this order.
 The models must also have either, all fixed degrees of freedom or
 estimated degrees of freedom. 
 }
+\references{
+Taylor, J. D. & Verbyla, A. P (2004).
+Joint modelling of the location and scale parameters of the \emph{t}-distribution.
+\emph{Statistical Modelling}
+\bold{4}, 91-112.
+}
 \seealso{
 \code{\link{tlm}}
 }
+\author{Julian Taylor}
 \examples{
 
 data(mm, package = "hett")

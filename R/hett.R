@@ -99,7 +99,7 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
     const <-  - n * lgamma(1/2) - n * lgamma(dof/2) - (n/2) * log(dof) + n * lgamma((dof + 1)/2)
     logLik <- const - (sum(log(sigmaI)))/2 - sum(((dof + 1)/2) * (log(1 + (sqResid/sigmaI)/dof)))
     logLikTemp <- logLik + 1
-    orthoComp <- solve(t(Z) %*% Z) %*% t(Z) %*% rep(1, n)
+    orthoComp <- apply(crossprod(solve(crossprod(Z)), t(Z)),1,sum)
     orthoCoef <- dispCoef - orthoComp 
     while(abs(logLik - logLikTemp) > epsilon && iter < maxit) {    
       ##            
@@ -324,18 +324,18 @@ function (x, digits = max(3, getOption("digits") - 3), symbolic.cor = x$symbolic
 }
 
 "tlm.control" <-
-function(epsilon = 9.9999999999999995e-08, maxit = 50, trace = FALSE, verboseLev = 1)
+function(epsilon = 1e-07, maxit = 50, trace = FALSE, verboseLev = 1)
 {
   ## tdispersion control parameters. 
   if(epsilon <= 0) {
     warning("the value of epsilon supplied is zero or negative;\nthe default value of 1e-7 was used instead"
             )
-    epsilon <- 9.9999999999999995e-08
+    epsilon <- 1e-07
   }
   if(maxit < 1) {
-    warning("the value of maxit supplied is zero or negative;\nthe default value of 25 was used instead"
+    warning("the value of maxit supplied is zero or negative;\nthe default value of 50 was used instead"
             )
-    maxit <- 25
+    maxit <- 50
   }
   if(verboseLev < 0 || verboseLev > 2)
     warning("the value of the verbose level is not in the expected range. Use \"verboseLev = 1\" for simple output and \"verboseLev = 2\" for advanced output"
@@ -348,7 +348,7 @@ function(epsilon = 9.9999999999999995e-08, maxit = 50, trace = FALSE, verboseLev
 function(dof, n, sqResid, orthoI, X, Z)
 {
   n <-  length(sqResid)
-  sigmaI <- as.vector(orthoI*exp(Z %*% solve(t(Z) %*% Z) %*% t(Z) %*% rep(2*(log(dof) - log(dof + 1)), n)))
+  sigmaI <- as.vector(orthoI*exp(Z %*% crossprod(solve(crossprod(Z)), t(Z)) %*% rep(2*(log(dof) - log(dof + 1)), n)))
   - (- n * lgamma(1/2) - n * lgamma(dof/2) - (n/2) * log(dof) + n * lgamma((dof + 1)/2) -
      (sum(log(sigmaI)))/2 - sum(((dof + 1)/2) * (log(1 + (sqResid/sigmaI)/dof))))
 }
@@ -384,7 +384,7 @@ function(..., data = NULL, scale = FALSE)
     Om <- random/(ssig^2)
     if(scale){
       Q <- qr.Q(qr(Xl[[k - 1]]))
-      P <- - Q %*% t(Q)
+      P <- - crossprod(t(Q))
       diag(P) <- 1 + diag(P)
       ss[j] <- ((listm[[k - 1]]$dof + 3)/(2 * listm[[k - 1]]$dof))*(t((resid(listm[[k - 1]]$loc.fit)^2)*Om - 1) %*% X2 %*% solve(t(X2) %*% P %*% X2)
                                                                     %*% t(X2) %*% (Om*(resid(listm[[k - 1]]$loc.fit)^2) - 1))
@@ -393,7 +393,7 @@ function(..., data = NULL, scale = FALSE)
     }
     else { 
       Q <- qr.Q(qr(ssig*Xl[[k - 1]]))
-      P <- diag(1/ssig^2) - diag(1/ssig) %*% Q %*% t(Q) %*% diag(1/ssig) 
+      P <- diag(1/ssig^2) - diag(1/ssig) %*% crossprod(t(Q)) %*% diag(1/ssig) 
       ss[j] <-  ((listm[[k - 1]]$dof + 3)/(listm[[k - 1]]$dof + 1))*(t(resid(listm[[k - 1]]$loc.fit)*Om) %*% X2 %*% solve(t(X2) %*% P %*% X2)
                                                                      %*% t(X2) %*% (Om*resid(listm[[k - 1]]$loc.fit)))
       df[j] <- listm[[k - 1]]$loc.fit$df.residual - listm[[k]]$loc.fit$df.residual
