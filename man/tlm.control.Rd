@@ -21,14 +21,11 @@ integer giving the maximum iterations allowable for the routine
 \item{trace}{
 logical. If \code{TRUE} output is printed to the screen during each iteration
 }
-\item{verboseLev}{
-integer. If 1 then print according to \code{trace}. If 2 then print
-random scale effects also.
-}}
+\item{verboseLev}{integer. If 1 then print according to \code{trace}. If 2 then print
+  random scale effects also.}
+}
 \value{
   A list with the argument as values
-  }
-\details{  
 }
 \seealso{
 \code{\link{tlm}}
