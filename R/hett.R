@@ -1,10 +1,9 @@
-"tlm" <-
-function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL, contrasts = NULL, na.action = na.fail, start = NULL, control = tlm.control(...), obs = FALSE, estDof = FALSE, ...)
+"tlm" <- function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL, contrasts = NULL, na.action = na.fail, start = NULL, control = tlm.control(...), obs = FALSE, estDof = FALSE, ...)
 {
   ## A function for modelling the location and scale parameters of the Students t..
   ## This will only handle a specific case where conditional on \omega, y = Xb + e as the location model
   ## where e \sim N(0, \sigma^2/\omega) and log(\sigma^2) = Z\lambda + log(\omega), where \omega
-  ## is distributed as Gamma(\nu/2,\nu/2). Marginally, y \sim t(Xb, \sigma^2, \nu). Reference (Lange, Little and Taylor, 1989)) 
+  ## is distributed as Gamma(\nu/2,\nu/2). Marginally, y \sim t(Xb, \sigma^2, \nu). Reference (Lange, Little and Taylor, 1989))
   ##
   ## Arguments :
   ##       lform   : location formula
@@ -18,13 +17,13 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
   ## 1) Fitting a model with constant scale requires no argument for "sform=".
   ## 2) For the initial dof in the start argument
   ##               : a) If estimating the degrees of freedom then this value is the intial (default = 3) only.
-  ##                 b) This is the value of the degrees of freedom if it is not being estimated (default = 3). 
+  ##                 b) This is the value of the degrees of freedom if it is not being estimated (default = 3).
   ## 2) To obtain the correct standard errors for the estimates use "obs = FALSE" so
   ##    the fit uses the expected information for its iteration of the location.
   ## 3) At the moment testing between models should be done using difference in
   ##    likelihoods or the score test rather than using the Pr(z-value) from summary().
   ##    This can be done using the "tscore" function.
-  
+  dofse <- NA
   tcall <- match.call()	##
   ## Setting up the location and scale model and
   ## extracting the appropriate information.
@@ -40,7 +39,7 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
   fixedFrame <- do.call("model.frame", fixedFrameArgs)
   dispFrame <- do.call("model.frame", dispFrameArgs)
   X <- model.matrix(lform, fixedFrame)
-  y <- model.extract(fixedFrame, response)
+  y <- model.extract(fixedFrame, "response")
   Z <- model.matrix(sform, dispFrame)
   if(!is.null(start)) {
     if(is.null(namStart <- names(start)))
@@ -59,7 +58,7 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
     fixedCoef <- coef(initFit)
     sqResid <- resid(initFit)^2
   }
-  dispFamily <- Gamma(link = "log") 
+  dispFamily <- Gamma(link = "log")
   if((lams <- pmatch("lambda", namStart, nomatch = 0)) != 0) {
     dispCoef <- start[[lams]]
     sigmaI <- dispFamily$linkinv(crossprod(t(Z), dispCoef))
@@ -72,17 +71,17 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
   }
   if((dofs <- pmatch("dof", namStart, nomatch = 0)) != 0){
     dof <- start[[dofs]]
-    if(length(dof) != 1) 
+    if(length(dof) != 1)
       stop(paste("initial value for degrees of freedom must be of length 1"))
   }
-  else   
+  else
     dof <- 3
   if((oms <- pmatch("omega", namStart, nomatch = 0)) != 0){
     randCoef <- start[[oms]]
     if(length(randCoef) != length(y))
       stop(paste("Starting values for scale random effects must be the same length as y"))
   }
-  else 
+  else
     randCoef <- (dof + 1)/(dof + sqResid/sigmaI)
   n <- length(y)
   ## control parameters for algorithm
@@ -100,9 +99,9 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
     logLik <- const - (sum(log(sigmaI)))/2 - sum(((dof + 1)/2) * (log(1 + (sqResid/sigmaI)/dof)))
     logLikTemp <- logLik + 1
     orthoComp <- apply(crossprod(solve(crossprod(Z)), t(Z)),1,sum)
-    orthoCoef <- dispCoef - orthoComp 
-    while(abs(logLik - logLikTemp) > epsilon && iter < maxit) {    
-      ##            
+    orthoCoef <- dispCoef - orthoComp
+    while(abs(logLik - logLikTemp) > epsilon && iter < maxit) {
+      ##
       ## location parameter likelihood
       ##
       if(!obs) {
@@ -114,9 +113,9 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
       fitm <- meanFit$fitted.values
       fixedCoef <- coef(meanFit)
       sqResid <- (as.vector(y - crossprod(t(X), fixedCoef)))^2
-      if(trace) cat("\nLocation parameters :", 
-                    format(round(fixedCoef, 4)))	
-      ##          
+      if(trace) cat("\nLocation parameters :",
+                    format(round(fixedCoef, 4)))
+      ##
       ## scale parameter estimation
       ##
       tscale <- (1 - 3/(dof + 3))
@@ -129,93 +128,86 @@ function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL
       if(trace) cat("\nScale parameters :", format(round(
                                                               dispCoef, 4)))
       ##
-      ## random component maximum likelihood 
+      ## random component maximum likelihood
       ##
       randCoef <- (dof + 1)/(dof + sqResid/sigmaI)
       if(trace && verbose == 2)
-        cat("\nRandom scale effects :", format(round(randCoef, 4)))
+          cat("\nRandom scale effects :", format(round(randCoef, 4)))
+      logLikTemp <- logLik
       ##
       ## degrees of freedom estimation
-      ##
+        ##
       if(estDof) {
         opt <- nlm(dof.profile, dof, n = n, sqResid = sqResid, orthoI = orthoI, X = X, Z = Z)
         dof <- opt$estimate
         if(trace)
           cat("\ndegrees of freedom is ", dof)
-        ## expected information for degrees of freedom standard error. 
+        ## expected information for degrees of freedom standard error.
         expinfDof <-   n*trigamma(dof/2)/4 - n*trigamma((dof + 1)/2)/4 - n*(dof + 5)/(2 * dof * (dof + 1)*(dof + 3)) - (2/(dof*(dof + 3)*(dof + 1)^2))*(t(rep(1, length(y))) %*% Z %*% orthoComp)
-      }
-      logLikTemp <- logLik
-      if(estDof) {
         logLik <- - opt$minimum
         dofse <- 1/sqrt(expinfDof)
       }
-      else {
+      else
         logLik <- const - sum(log(sigmaI))/2 - sum(((dof + 1)/2) * (log(1 + (sqResid/sigmaI)/dof)))
-        dofse <- NA
-      }
       iter <- iter + 1
       if(trace)
         cat("\nHeteroscedastic t: - 2 x Maximum Likelihood iteration", iter, " : ", format(round(-2 * logLik, 4)), "\n")
     }})
-  estMethod <-  eval(max.fit)        
+  estMethod <-  eval(max.fit)
   ##
   ## Coverged or not?
-  ##                 
+  ##
   endTime <- proc.time()[1] - initTime
-  if(trace && iter >= maxit) cat("\nMaximum", maxit, 
-                "iterations reached in", endTime, "\n")	                                      
+  if(trace && iter >= maxit) cat("\nMaximum", maxit,
+                "iterations reached in", endTime, "\n")
   meanFit$method <- "maximum likelihood"
   random <- randCoef
   meanFit$formula <- lform
   meanFit$terms <- attr(fixedFrame, "terms")
   meanFit$iter <- iter
   meanFit$call <- tcall
-  meanFit$residuals <- as.vector(y - crossprod(t(X), fixedCoef)) 
+  meanFit$residuals <- as.vector(y - crossprod(t(X), fixedCoef))
   dispFit$formula <- sform
   dispFit$terms <- attr(dispFrame, "terms")
   dispFit$iter <- iter
   dispFit$fitted.values <- sigmaI
   dispFit$call <- tcall
-  res <- list(loc.fit = meanFit, scale.fit = dispFit, random = 
-              random, dof = dof, dofse = dofse, iter = iter, logLik = 
+  res <- list(loc.fit = meanFit, scale.fit = dispFit, random =
+              random, dof = dof, dofse = dofse, iter = iter, logLik =
               logLik, endTime = endTime)
   class(res) <- c("tlm", "glm", "lm")
   res
 }
 
-"summary.tlm" <-
-function(object, correlation = FALSE, ...)
+"summary.tlm" <- function(object, correlation = FALSE, ...)
 {
   locOut <- object$loc.fit
   scaleOut <- object$scale.fit
   locSum <- tsum(locOut, dispersion = 1, correlation = correlation, ...)
   scaleSum <- tsum(scaleOut, dispersion = 2, correlation = correlation, ...)
-  structure(list(loc.summary = locSum, scale.summary = scaleSum, iter = 
+  structure(list(loc.summary = locSum, scale.summary = scaleSum, iter =
                  object$iter, dof = object$dof, dofse = object$dofse,
-                 logLik = object$logLik, method = locOut$method, 
+                 logLik = object$logLik, method = locOut$method,
                  estTime = object$endTime), class = c("summary.tlm"))
 }
 
-"print.tlm" <-
-function(x, ...)
+"print.tlm" <- function(x, ...)
   {
     cat("\nCall: ")
     cat(format(x$loc.fit$call), "\n\n")
     cat("Location Coefficients:\n")
-    print.default(format(x$loc.fit$coefficients, digits = options()$digits), print.gap = 2, 
+    print.default(format(x$loc.fit$coefficients, digits = options()$digits), print.gap = 2,
                   quote = FALSE)
     cat("Scale Coefficients:\n")
-    print.default(format(x$scale.fit$coefficients, digits = options()$digits), print.gap = 2, 
+    print.default(format(x$scale.fit$coefficients, digits = options()$digits), print.gap = 2,
                   quote = FALSE)
     cat("Degrees of freedom:\n")
     cat(format(x$dof), "\n")
     cat("Log-Likelihood\n")
-    cat(format(x$logLik), "\n")    
+    cat(format(x$logLik), "\n")
   }
 
-"print.summary.tlm" <-
-function(x, ...)
+"print.summary.tlm" <- function(x, ...)
 {
   cat("Location model :\n")
   print(x$loc.summary, scale = FALSE, ...)
@@ -232,8 +224,7 @@ function(x, ...)
   cat("\nHeteroscedastic t Likelihood :", format(x$logLik), "\n")
 }
 
-"tsum" <-
-function (object, dispersion = NULL, correlation = FALSE, symbolic.cor = FALSE, 
+"tsum" <- function (object, dispersion = NULL, correlation = FALSE, symbolic.cor = FALSE,
             ...)
   ## Function edited from summary.glm()
   ## Sets up the summary information for the location and scale model for the t
@@ -257,13 +248,13 @@ function (object, dispersion = NULL, correlation = FALSE, symbolic.cor = FALSE,
   if (!est.disp) {
     pvalue <- 2 * pnorm(-abs(tvalue))
     coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
-    dimnames(coef.table) <- list(names(coef.p), c(dn, "z value", 
+    dimnames(coef.table) <- list(names(coef.p), c(dn, "z value",
                                                   "Pr(>|z|)"))
   }
   else if (df.r > 0) {
     pvalue <- 2 * pt(-abs(tvalue), df.r)
     coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
-    dimnames(coef.table) <- list(names(coef.p), c(dn, "t value", 
+    dimnames(coef.table) <- list(names(coef.p), c(dn, "t value",
                                                   "Pr(>|t|)"))
   }
   else {
@@ -280,39 +271,38 @@ function (object, dispersion = NULL, correlation = FALSE, symbolic.cor = FALSE,
   return(ans)
 }
 
-"print.tsum" <-
-function (x, digits = max(3, getOption("digits") - 3), symbolic.cor = x$symbolic.cor, 
-            signif.stars = getOption("show.signif.stars"), scale = TRUE, ...) 
+"print.tsum" <- function (x, digits = max(3, getOption("digits") - 3), symbolic.cor = x$symbolic.cor,
+            signif.stars = getOption("show.signif.stars"), scale = TRUE, ...)
 {
   cat("\nCall:\n")
-  cat(paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+  cat(paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
   cat("Residuals: \n")
   if (x$df.residual > 5) {
     x$resid <- quantile(x$resid, na.rm = TRUE)
-    names(x$resid) <- c("Min", "1Q", "Median", "3Q", 
+    names(x$resid) <- c("Min", "1Q", "Median", "3Q",
                         "Max")
   }
-  print.default(x$resid, digits = digits, na = "", 
+  print.default(x$resid, digits = digits, na.print = "",
                 print.gap = 2)
   cat("\nCoefficients:\n")
-  printCoefmat(x$coef, digits = digits, signif.stars = signif.stars, 
+  printCoefmat(x$coef, digits = digits, signif.stars = signif.stars,
                 ...)
   if(scale)
-    cat("\n(Scale parameter taken to be ", 
+    cat("\n(Scale parameter taken to be ",
         format(x$dispersion),")\n")
   else
-    cat("\n(Scale parameter(s) as estimated below)\n")  
+    cat("\n(Scale parameter(s) as estimated below)\n")
   correl <- x$correlation
   if (!is.null(correl)) {
     p <- NCOL(correl)
     if (p > 1) {
       cat("\nCorrelation of Coefficients:\n")
       if (is.logical(symbolic.cor) && symbolic.cor) {
-        print(symnum(correl, abbr.col = NULL))
+        print(symnum(correl, abbr.colnames = NULL))
       }
       else {
-        correl <- format(round(correl, 2), nsmall = 2, 
+        correl <- format(round(correl, 2), nsmall = 2,
                          digits = digits)
         correl[!lower.tri(correl)] <- ""
         print(correl[-1, -p, drop = FALSE], quote = FALSE)
@@ -323,10 +313,9 @@ function (x, digits = max(3, getOption("digits") - 3), symbolic.cor = x$symbolic
   invisible(x)
 }
 
-"tlm.control" <-
-function(epsilon = 1e-07, maxit = 50, trace = FALSE, verboseLev = 1)
+"tlm.control" <- function(epsilon = 1e-07, maxit = 50, trace = FALSE, verboseLev = 1)
 {
-  ## tdispersion control parameters. 
+  ## tdispersion control parameters.
   if(epsilon <= 0) {
     warning("the value of epsilon supplied is zero or negative;\nthe default value of 1e-7 was used instead"
             )
@@ -340,12 +329,11 @@ function(epsilon = 1e-07, maxit = 50, trace = FALSE, verboseLev = 1)
   if(verboseLev < 0 || verboseLev > 2)
     warning("the value of the verbose level is not in the expected range. Use \"verboseLev = 1\" for simple output and \"verboseLev = 2\" for advanced output"
             )
-  list(epsilon = epsilon, maxit = maxit, trace = trace, 
+  list(epsilon = epsilon, maxit = maxit, trace = trace,
        verboseLev = verboseLev)
 }
 
-"dof.profile" <-
-function(dof, n, sqResid, orthoI, X, Z)
+"dof.profile" <- function(dof, n, sqResid, orthoI, X, Z)
 {
   n <-  length(sqResid)
   sigmaI <- as.vector(orthoI*exp(Z %*% crossprod(solve(crossprod(Z)), t(Z)) %*% rep(2*(log(dof) - log(dof + 1)), n)))
@@ -353,21 +341,20 @@ function(dof, n, sqResid, orthoI, X, Z)
      (sum(log(sigmaI)))/2 - sum(((dof + 1)/2) * (log(1 + (sqResid/sigmaI)/dof))))
 }
 
-"tscore" <-
-function(..., data = NULL, scale = FALSE)
+"tscore" <- function(..., data = NULL, scale = FALSE)
 {
   ## General score test for the t-dispersion model for both scale and location
   listm <- list(...)
   if(is.null(data))
     stop("Score function requires the data to reproduce some model elements")
-  assign("data", data, envir = .GlobalEnv)
+#  assign("data", data, envir = .GlobalEnv)
   dofse <- unlist(lapply(listm, function(el) el$dofse))
   if(any(is.na(dofse))){
     if(!all(is.na(dofse)))
       stop("All models must have estimated or fixed degrees of freedom\n")
   }
   fullm <- do.call("model.frame", list(listm[[length(listm)]]$loc.fit$formula, data = data))
-  y <- model.extract(fullm, response)  
+  y <- model.extract(fullm, "response")
   k <- length(listm)
   ss <- pv <- df <- vector()
   if(scale)
@@ -391,15 +378,15 @@ function(..., data = NULL, scale = FALSE)
       df[j] <- listm[[k - 1]]$scale.fit$df.residual - listm[[k]]$scale.fit$df.residual
       nams[j] <- paste(paste(deparse(listm[[k - 1]]$scale.fit$formula[[3]]), "vs", sep = " "), deparse(listm[[k]]$scale.fit$formula[[3]]), sep = " ")
     }
-    else { 
+    else {
       Q <- qr.Q(qr(ssig*Xl[[k - 1]]))
-      P <- diag(1/ssig^2) - diag(1/ssig) %*% crossprod(t(Q)) %*% diag(1/ssig) 
+      P <- diag(1/ssig^2) - diag(1/ssig) %*% crossprod(t(Q)) %*% diag(1/ssig)
       ss[j] <-  ((listm[[k - 1]]$dof + 3)/(listm[[k - 1]]$dof + 1))*(t(resid(listm[[k - 1]]$loc.fit)*Om) %*% X2 %*% solve(t(X2) %*% P %*% X2)
                                                                      %*% t(X2) %*% (Om*resid(listm[[k - 1]]$loc.fit)))
       df[j] <- listm[[k - 1]]$loc.fit$df.residual - listm[[k]]$loc.fit$df.residual
       nams[j] <- paste(paste(deparse(listm[[k - 1]]$loc.fit$formula[[3]]), "vs", sep = " "), deparse(listm[[k]]$loc.fit$formula[[3]]), sep = " ")
     }
-    pv[j] <- 1 - pchisq(ss[j], df[j])    
+    pv[j] <- 1 - pchisq(ss[j], df[j])
     k <- k - 1
     j <- j + 1
   }
