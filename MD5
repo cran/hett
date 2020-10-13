@@ -1,14 +1,14 @@
-a39f706440536db51b325b67902e054c *DESCRIPTION
+533208ffc6e32368b44510c775ebc4df *DESCRIPTION
 c24bbc85eddaa91137328a2de4022320 *INDEX
 3f2cbb3c2c5955b9dab26ed487a11701 *NAMESPACE
-eb60df3314d80cd204df75208aca7c02 *R/hett.R
+caadbb88482a81a478695d508d323677 *R/hett.R
 9c38de862ca00f9e7f16fbd3ef2959a7 *data/mm.rda
 85be7a0147e9c12cb8577f1cadfa0858 *data/rent.rda
 80c469cabc10f30af6504b8e249b3f93 *man/hett-internal.Rd
 83adc90b7e16cd2f245a7f80f9ff194b *man/mm.Rd
 b49e359f2f2afd49a8150646803c15a7 *man/rent.Rd
 57150005d77a1d9e29da55becdaa882b *man/summary.tlm.Rd
-5bb676fb521a4703be484ac397932967 *man/tlm.Rd
+506bac5359e08049a18d518d92277982 *man/tlm.Rd
 2ca274642451e78fab145cf53422698d *man/tlm.control.Rd
 ae28c545afb1260ffab1b4fa1e07d4a1 *man/tscore.Rd
 982ddc8b11522c2f69773202b7bf232c *man/tsum.Rd

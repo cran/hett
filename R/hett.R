@@ -1,33 +1,7 @@
-"tlm" <- function(lform = formula(data), sform =  ~ 1, data = sys.parent(), subset = NULL, contrasts = NULL, na.action = na.fail, start = NULL, control = tlm.control(...), obs = FALSE, estDof = FALSE, ...)
+"tlm" <- function(lform = formula(data), sform =  ~ 1, data = NULL, subset = NULL, contrasts = NULL, na.action = na.fail, start = NULL, control = tlm.control(...), obs = FALSE, estDof = FALSE, ...)
 {
-  ## A function for modelling the location and scale parameters of the Students t..
-  ## This will only handle a specific case where conditional on \omega, y = Xb + e as the location model
-  ## where e \sim N(0, \sigma^2/\omega) and log(\sigma^2) = Z\lambda + log(\omega), where \omega
-  ## is distributed as Gamma(\nu/2,\nu/2). Marginally, y \sim t(Xb, \sigma^2, \nu). Reference (Lange, Little and Taylor, 1989))
-  ##
-  ## Arguments :
-  ##       lform   : location formula
-  ##       sform   : scale formula
-  ##       start   : starting values (list of beta,lambda,dof,omega)
-  ##       control : control prameters for iterative scheme
-  ##       obs     : TRUE, FALSE. Use the expected information for estimation or reweighted least squares estimation
-  ##       estDof  : TRUE, FALSE. Estimate or fix the degrees of freedom parameter
-
-  ## Comments :
-  ## 1) Fitting a model with constant scale requires no argument for "sform=".
-  ## 2) For the initial dof in the start argument
-  ##               : a) If estimating the degrees of freedom then this value is the intial (default = 3) only.
-  ##                 b) This is the value of the degrees of freedom if it is not being estimated (default = 3).
-  ## 2) To obtain the correct standard errors for the estimates use "obs = FALSE" so
-  ##    the fit uses the expected information for its iteration of the location.
-  ## 3) At the moment testing between models should be done using difference in
-  ##    likelihoods or the score test rather than using the Pr(z-value) from summary().
-  ##    This can be done using the "tscore" function.
   dofse <- NA
-  tcall <- match.call()	##
-  ## Setting up the location and scale model and
-  ## extracting the appropriate information.
-  ##
+  tcall <- match.call()
   sform[3] <- sform[2]
   sform[2] <- lform[2]
   fixedFrameArgs <- list(lform, na.action = na.action, contrasts = contrasts, data = data)

@@ -9,7 +9,7 @@ Fits a heteroscedastic t regression to given data for known and unknown
 degrees of freedom.
 }
 \usage{
-tlm(lform, sform =  ~ 1, data = sys.parent(), subset = NULL, contrasts =
+tlm(lform, sform =  ~ 1, data = NULL, subset = NULL, contrasts =
     NULL, na.action = na.fail, start = NULL, control = tlm.control(...),
     obs = FALSE, estDof = FALSE, ... )
 
@@ -119,7 +119,7 @@ must specify the argument \code{obs = F} to ensure that the location
 parameter is calculated using the expected information.
 }
 \section{Background}{
-The theoretical background for this function can be found in Taylor and Verbyla (2004)
+The theoretical background for this function can be found in Taylor and Verbyla (2004).
 }
 \references{
 Taylor, J. D. & Verbyla, A. P (2004).
